@@ -1,10 +1,28 @@
-import './App.css'
+import './App.css';
+import { Button } from './components/Button';
+import { ThemeProvider } from 'styled-components'
+import { defaultTheme } from './styles/themes/default';
+import { GlobalStyle } from './styles/global';
 
-function App() {
-
+export function App() {
   return (
-    <p>Hello, world!</p>
-  )
+    <ThemeProvider theme={defaultTheme}>
+      <Button variant='primary' />
+      <Button variant='secondary' />
+      <Button variant='danger' />
+      <Button variant='sucess' />
+      <Button/> 
+      
+      
+      <GlobalStyle/>
+    </ThemeProvider>
+  );
 }
 
-export default App
+
+
+      /* <Button color='primary'/>
+      <Button color='secondary'/>
+      <Button color='sucess'/>
+      <Button color='danger'/>
+      <Button/> */
