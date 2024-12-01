@@ -10,8 +10,11 @@ import {
 } from "./styles";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as zod from "zod"; //quando a biblioteca que estou importando não possuí um export default, uso essa sintaxe
+//quando a biblioteca que estou importando não possuí um export default, uso essa sintaxe:
+import * as zod from "zod";
+import { useState } from "react";
 
+//Validação dos inputs do formulário:
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, "Informe a terefa"),
   minutesAmount: zod
@@ -23,24 +26,53 @@ const newCycleFormValidationSchema = zod.object({
 //criando uma tipagem a partir de uma constante já criada anteriormente:
 type newCycleFormatData = zod.infer<typeof newCycleFormValidationSchema>;
 
-export function Home() {
-  const { register, handleSubmit, watch } = useForm<newCycleFormatData>(
-    //objeto de configuração
-    {
-      resolver: zodResolver(newCycleFormValidationSchema),
-    }
-  );
+interface Cycle {
+  id: string;
+  task: string;
+  minutesAmount: number;
+}
 
-  function handleCreateNewCicle(data: newCycleFormatData) {
-    console.log(data);
+export function Home() {
+  //Estado para armazenas a lista de ciclos
+  const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
+
+  const { register, handleSubmit, watch, reset } = useForm<newCycleFormatData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: "",
+      minutesAmount: 0,
+    },
+  });
+
+  function handleCreateNewCycle(data: newCycleFormatData) {
+    const id = String(new Date().getTime());
+
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    };
+
+    //Usando arrow function pois o novo valor do estado precisa do seu valor anterior:
+    setCycles((state) => [...state, newCycle]);
+
+    //Definindo o novo ciclo como o ativo:
+    setActiveCycleId(id);
+
+    reset();
   }
+
+  //procurar nos ciclos o ciclo que está com o id ativo
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+  console.log(activeCycle);
 
   const task = watch("task");
   const isSubmitDisabled = !task;
 
   return (
     <HomeContainer>
-      <form onSubmit={handleSubmit(handleCreateNewCicle)}>
+      <form onSubmit={handleSubmit(handleCreateNewCycle)}>
         <FormContainer>
           <label htmlFor="task">Vou trabalhar em </label>
           <TaskInput
