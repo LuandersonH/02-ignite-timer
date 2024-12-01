@@ -20,15 +20,18 @@ const newCycleFormValidationSchema = zod.object({
     .max(60, "O máximo precisa ser 60 minutos."),
 });
 
+//criando uma tipagem a partir de uma constante já criada anteriormente:
+type newCycleFormatData = zod.infer<typeof newCycleFormValidationSchema>;
+
 export function Home() {
-  const { register, handleSubmit, watch } = useForm(
+  const { register, handleSubmit, watch } = useForm<newCycleFormatData>(
     //objeto de configuração
     {
       resolver: zodResolver(newCycleFormValidationSchema),
     }
   );
 
-  function handleCreateNewCicle(data: object) {
+  function handleCreateNewCicle(data: newCycleFormatData) {
     console.log(data);
   }
 
@@ -58,7 +61,6 @@ export function Home() {
             type="number"
             id="minutesAmount"
             placeholder="00"
-            defaultValue={0}
             step={5}
             min={5}
             max={60}
