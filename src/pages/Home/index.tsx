@@ -12,7 +12,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 //quando a biblioteca que estou importando não possuí um export default, uso essa sintaxe:
 import * as zod from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { differenceInSeconds } from "date-fns";
 
 //Validação dos inputs do formulário:
 const newCycleFormValidationSchema = zod.object({
@@ -30,12 +31,33 @@ interface Cycle {
   id: string;
   task: string;
   minutesAmount: number;
+  startDate: Date;
 }
 
 export function Home() {
   //Estado para armazenas a lista de ciclos
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
+  const [amountSecondsPassed, setamountSecondsPassed] = useState(0);
+
+  //procurar nos ciclos o ciclo que está com o id ativo
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+
+  useEffect(() => {
+    let interval: number;
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        setamountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate)
+        );
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [activeCycle]);
 
   const { register, handleSubmit, watch, reset } = useForm<newCycleFormatData>({
     resolver: zodResolver(newCycleFormValidationSchema),
@@ -52,6 +74,7 @@ export function Home() {
       id,
       task: data.task,
       minutesAmount: data.minutesAmount,
+      startDate: new Date(),
     };
 
     //Usando arrow function pois o novo valor do estado precisa do seu valor anterior:
@@ -60,12 +83,27 @@ export function Home() {
     //Definindo o novo ciclo como o ativo:
     setActiveCycleId(id);
 
+    //Quando um novo ciclo é criado, os segundos passados do ciclo anterior são resetados:
+    setamountSecondsPassed(0);
+
     reset();
   }
 
-  //procurar nos ciclos o ciclo que está com o id ativo
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
-  console.log(activeCycle);
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0;
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
+
+  const minutesAmount = Math.floor(currentSeconds / 60);
+  const secondsAmount = currentSeconds % 60;
+
+  // padStart = quantas casas decimais terá, o que vai completar a casa decimal da esquerda
+  const minutes = String(minutesAmount).padStart(2, "0");
+  const seconds = String(secondsAmount).padStart(2, "0");
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`;
+    }
+  }, [minutes, seconds, activeCycle]);
 
   const task = watch("task");
   const isSubmitDisabled = !task;
@@ -101,12 +139,13 @@ export function Home() {
           <span>minutos.</span>
         </FormContainer>
         <CountDownContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{minutes[0]}</span>
+          <span>{minutes[1]}</span>
           <Separator>:</Separator>
-          <span>0</span>
-          <span>0</span>
+          <span>{seconds[0]}</span>
+          <span>{seconds[1]}</span>
         </CountDownContainer>
+
         <StartCountdownButton disabled={isSubmitDisabled} type="submit">
           <Play size={24} />
           Começar
