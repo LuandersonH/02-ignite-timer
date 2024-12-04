@@ -32,7 +32,6 @@ export const FormContainer = styled.div`
 const BaseInput = styled.input`
   background: transparent;
 
-  
   height: 2.5rem;
   border: 0;
   border-bottom: 2px solid ${(props) => props.theme["gray-500"]};
@@ -43,11 +42,11 @@ const BaseInput = styled.input`
 
   &:focus {
     box-shadow: none;
-    border-color: ${(props) => props.theme["green-500"]}
+    border-color: ${(props) => props.theme["green-500"]};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme["gray-500"]}
+    color: ${(props) => props.theme["gray-500"]};
   }
 `;
 
@@ -56,13 +55,11 @@ export const TaskInput = styled(BaseInput)`
   &::-webkit-calendar-picker-indicator {
     display: none !important;
   }
-
-`
+`;
 
 export const MinutesAmountInput = styled(BaseInput)`
   width: 4rem;
-`
-
+`;
 
 export const CountDownContainer = styled.div`
   font-family: "Roboto Mono", monospace;
@@ -90,7 +87,7 @@ export const Separator = styled.div`
   justify-content: center;
 `;
 
-export const StartCountdownButton = styled.button`
+export const BaseCountdownButton = styled.button`
   width: 100%;
   border: 0;
   padding: 1rem;
@@ -105,15 +102,26 @@ export const StartCountdownButton = styled.button`
 
   cursor: pointer;
 
-  background: ${(props) => props.theme["green-500"]};
-  color: ${(props) => props.theme["gray-100"]};
-
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
   }
+`;
+
+export const StartCountdownButton = styled(BaseCountdownButton)`
+  background: ${(props) => props.theme["green-500"]};
+  color: ${(props) => props.theme["gray-100"]};
 
   &:not(:disabled):hover {
     background: ${(props) => props.theme["green-700"]};
+  }
+`;
+
+export const StopCountdownButton = styled(BaseCountdownButton)`
+  background: ${(props) => props.theme["red-500"]};
+  color: ${(props) => props.theme["gray-100"]};
+
+  &:not(:disabled):hover {
+    background: ${(props) => props.theme["red-700"]};
   }
 `;
