@@ -1,10 +1,15 @@
 import { HandPalm, Play } from "phosphor-react";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as zod from "zod";
+import { createContext, useState } from "react";
+
 import {
   HomeContainer,
   StartCountdownButton,
   StopCountdownButton,
 } from "./styles";
-import { useEffect, useState } from "react";
+
 import { CountDown } from "./components/CountDown";
 import { NewCycleForm } from "./components/newCycleForm";
 
@@ -17,13 +22,64 @@ interface Cycle {
   finishedDate?: Date;
 }
 
+interface CyclesContextType {
+  activeCycle: Cycle | undefined;
+  activeCycleId: string | null;
+  amountSecondsPassed: number;
+  markCurrentCycleAsFinished: () => void;
+  setSecondsPassed: (seconds: number) => void;
+}
+
+export const CyclesContext = createContext({} as CyclesContextType);
+
+//Validação dos inputs do formulário:
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(5, "Informe a terefa"),
+  minutesAmount: zod
+    .number()
+    .min(5, "O minimo precisa ser 5 minutos.")
+    .max(60, "O máximo precisa ser 60 minutos."),
+});
+
+//criando uma tipagem a partir de uma constante já criada anteriormente:
+type newCycleFormatData = zod.infer<typeof newCycleFormValidationSchema>;
+
 export function Home() {
   //Estado para armazenas a lista de ciclos
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
+  const [amountSecondsPassed, setamountSecondsPassed] = useState(0);
 
-  //procurar nos ciclos o ciclo que está com o id ativo
+  const newCycleForm = useForm<newCycleFormatData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: "",
+      minutesAmount: 0,
+    },
+  });
+
+  const { handleSubmit, watch, reset } = newCycleForm;
+
+  //procura nos ciclos o ciclo que está com o id ativo
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+
+  function setSecondsPassed(seconds: number) {
+    setamountSecondsPassed(seconds);
+  }
+
+  //A função para setar o cycle como finalizado foi definido aqui pois:
+  //Usa da função setCycles, que só existe dentro do componente Home (para evitar exportar o setState todo)
+  function markCurrentCycleAsFinished() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, finishedDate: new Date() };
+        } else {
+          return cycle;
+        }
+      })
+    );
+  }
 
   function handleCreateNewCycle(data: newCycleFormatData) {
     const id = String(new Date().getTime());
@@ -60,30 +116,27 @@ export function Home() {
     setActiveCycleId(null);
   }
 
-  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
-
-  const minutesAmount = Math.floor(currentSeconds / 60);
-  const secondsAmount = currentSeconds % 60;
-
-  // padStart = quantas casas decimais terá, o que vai completar a casa decimal da esquerda
-  const minutes = String(minutesAmount).padStart(2, "0");
-  const seconds = String(secondsAmount).padStart(2, "0");
-
-  useEffect(() => {
-    if (activeCycle) {
-      document.title = `${minutes}:${seconds}`;
-    }
-  }, [minutes, seconds, activeCycle]);
-
   const task = watch("task");
   const isSubmitDisabled = !task;
 
   console.log(activeCycleId);
   return (
     <HomeContainer>
-      <form onSubmit={handleSubmit(handleCreateNewCycle)}>
-        <NewCycleForm />
-        <CountDown activeCycle={activeCycle} />
+      <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
+        <CyclesContext.Provider
+          value={{
+            activeCycle,
+            activeCycleId,
+            markCurrentCycleAsFinished,
+            amountSecondsPassed,
+            setSecondsPassed,
+          }}
+        >
+          <FormProvider {...newCycleForm}>
+            <NewCycleForm />
+          </FormProvider>
+          <CountDown />
+        </CyclesContext.Provider>
 
         {activeCycle ? (
           <StopCountdownButton onClick={handleInterruptCycle} type="button">
