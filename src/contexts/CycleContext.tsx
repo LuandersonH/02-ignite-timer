@@ -57,13 +57,11 @@ export function CyclesContextProvider({
     //Usando arrow function pois o novo valor do estado precisa do seu valor anterior:
     setCycles((state) => [...state, newCycle]);
 
-    //Definindo o novo ciclo como o ativo:
     setActiveCycleId(id);
 
     //Quando um novo ciclo é criado, os segundos passados do ciclo anterior são resetados:
     setamountSecondsPassed(0);
 
-    // reset();
   }
 
   function InterruptCurrentCycle() {
