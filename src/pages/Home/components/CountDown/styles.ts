@@ -14,6 +14,15 @@ export const CountDownContainer = styled.div`
     padding: 2rem 1rem;
     border-radius: 8px;
   }
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+
+    span {
+      /* color: red; */
+      font-size: 4.5rem;
+    }
+  }
 `;
 
 export const Separator = styled.div`
@@ -24,4 +33,10 @@ export const Separator = styled.div`
   overflow: hidden;
   display: flex;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    width: 2rem;
+    font-size: 5rem;
+    padding: 2rem 0;
+  }
 `;

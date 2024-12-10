@@ -10,7 +10,7 @@ export function NewCycleForm() {
  
     return (
         <FormContainer>
-          <label htmlFor="task">Vou trabalhar em </label>
+          <label htmlFor="task">Vou trabalhar em: </label>
           <TaskInput
             type="text"
             id="task"
@@ -25,7 +25,7 @@ export function NewCycleForm() {
             <option value="Banana" />
           </datalist>
 
-          <label htmlFor="minutesAmount">durante</label>
+          <label htmlFor="minutesAmount">durante: </label>
           <MinutesAmountInput
             type="number"
             id="minutesAmount"
