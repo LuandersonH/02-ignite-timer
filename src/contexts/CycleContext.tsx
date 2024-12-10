@@ -68,7 +68,6 @@ export function CyclesContextProvider({
 
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction());
-
   }
 
   return (
