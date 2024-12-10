@@ -1,6 +1,5 @@
 import { ActionTypes } from "./actions";
 import { produce } from "immer";
-import { produce } from "immer";
 
 export interface Cycle {
   id: string;
